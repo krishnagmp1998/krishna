@@ -1,9 +1,12 @@
-body {
-    background-color: powderblue; font-family: Verdana; text-align: center;
-  }
-  h1 {
-    color: blue; font-family: Verdana; text-align: center;
-  }
-  p {
-    color: red; font-family: Verdana; text-align: center;
-  }
+body 
+{
+  background-color: powderblue; font-family: Verdana; text-align: center;border: 2px Solid black; padding: 30px; margin: 5px
+}
+h1 
+{
+  color: blue; font-family: Verdana; text-align: center; border: 2px Solid black; padding: 30px; margin: 5px
+}
+p 
+{
+  color: red; font-family: Verdana; text-align: center; border: 2px Solid black; padding: 30px; margin: 5px
+}
