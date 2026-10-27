@@ -1,389 +1,178 @@
-```html
 <!DOCTYPE html>
-<html lang="en" class="dark">
+<html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Calisthenics & Core Control Dashboard</title>
-  <!-- Tailwind CSS -->
-  <script src="https://cdn.tailwindcss.com"></script>
-  <!-- FontAwesome Icons -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <!-- Google Fonts: Inter -->
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-  <script>
-    tailwind.config = {
-      darkMode: 'class',
-      theme: {
-        extend: {
-          fontFamily: {
-            sans: ['Inter', 'sans-serif'],
-          },
-          colors: {
-            brand: {
-              dark: '#0f172a',
-              card: '#1e293b',
-              border: '#334155',
-              neon: '#10b981', // Emerald 500
-              cyan: '#06b6d4', // Cyan 500
-              accent: '#3b82f6',
-            }
-          }
-        }
-      }
-    }
-  </script>
-  <style>
-    body {
-      background-color: #090d16;
-      color: #f8fafc;
-    }
-    .glass-card {
-      background: rgba(30, 41, 59, 0.7);
-      backdrop-filter: blur(10px);
-      border: 1px solid rgba(255, 255, 255, 0.08);
-    }
-    .neon-border {
-      border-color: rgba(16, 185, 129, 0.4);
-    }
-    .neon-glow {
-      box-shadow: 0 0 15px rgba(16, 185, 129, 0.25);
-    }
-    /* Custom Scrollbar */
-    ::-webkit-scrollbar {
-      width: 6px;
-      height: 6px;
-    }
-    ::-webkit-scrollbar-track {
-      background: #0f172a;
-    }
-    ::-webkit-scrollbar-thumb {
-      background: #334155;
-      border-radius: 3px;
-    }
-    ::-webkit-scrollbar-thumb:hover {
-      background: #10b981;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calisthenics & Core Control Tracker</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 </head>
-<body class="font-sans min-h-screen flex flex-col justify-between antialiased selection:bg-emerald-500 selection:text-black pb-12">
+<body class="bg-slate-950 text-slate-100 min-h-screen font-sans antialiased" x-data="workoutApp()">
 
-  <!-- Top Header Navigation -->
-  <header class="sticky top-0 z-50 glass-card border-b border-slate-800 bg-slate-900/80 backdrop-blur-md">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-      <div class="flex items-center space-x-3">
-        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-emerald-500 to-cyan-500 flex items-center justify-center text-slate-950 font-black text-xl shadow-lg shadow-emerald-500/20">
-          <i class="fa-solid fa-person-running"></i>
-        </div>
-        <div>
-          <h1 class="text-lg font-bold tracking-tight text-white flex items-center gap-2">
-            CORE CONTROL <span class="text-xs px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400 font-semibold border border-emerald-500/30">CALISTHENICS</span>
-          </h1>
-          <p class="text-xs text-slate-400">Target: Fitness, Stamina & Fat Loss</p>
-        </div>
-      </div>
-
-      <!-- Quick Action Controls -->
-      <div class="flex items-center gap-3">
-        <button id="progressionToggle" onclick="toggleProgression()" class="text-xs px-3 py-1.5 rounded-lg border border-slate-700 bg-slate-800 hover:bg-slate-700 text-slate-300 flex items-center gap-2 transition-all">
-          <i class="fa-solid fa-arrow-up-right-dots text-emerald-400"></i>
-          <span id="progressionText">Weeks 1-2 (Base Reps)</span>
-        </button>
-      </div>
-    </div>
-  </header>
-
-  <!-- Main Container -->
-  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 space-y-8 flex-grow w-full">
-
-    <!-- Top Dashboard Stats & Quick Status -->
-    <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-      <div class="glass-card p-4 rounded-2xl border border-slate-800 flex items-center gap-4">
-        <div class="p-3 rounded-xl bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
-          <i class="fa-solid fa-calendar-check text-2xl"></i>
-        </div>
-        <div>
-          <p class="text-xs text-slate-400 uppercase font-medium">Weekly Rhythm</p>
-          <p class="text-sm font-bold text-slate-100">Tue / Thu / Sat</p>
-          <p class="text-[11px] text-emerald-400">1 Set Per Workout</p>
-        </div>
-      </div>
-
-      <div class="glass-card p-4 rounded-2xl border border-slate-800 flex items-center gap-4">
-        <div class="p-3 rounded-xl bg-cyan-500/10 text-cyan-400 border border-cyan-500/20">
-          <i class="fa-solid fa-clock text-2xl"></i>
-        </div>
-        <div>
-          <p class="text-xs text-slate-400 uppercase font-medium">Session Duration</p>
-          <p class="text-sm font-bold text-slate-100">~25 - 30 Mins</p>
-          <p class="text-[11px] text-cyan-400">Paced Reps & Holds</p>
-        </div>
-      </div>
-
-      <div class="glass-card p-4 rounded-2xl border border-slate-800 flex items-center gap-4">
-        <div class="p-3 rounded-xl bg-blue-500/10 text-blue-400 border border-blue-500/20">
-          <i class="fa-solid fa-shoe-prints text-2xl"></i>
-        </div>
-        <div>
-          <p class="text-xs text-slate-400 uppercase font-medium">Rest Days</p>
-          <p class="text-sm font-bold text-slate-100">Active Walking</p>
-          <p class="text-[11px] text-blue-400">Mon / Wed / Fri / Sun</p>
-        </div>
-      </div>
-
-      <div class="glass-card p-4 rounded-2xl border border-slate-800 flex items-center gap-4">
-        <div class="p-3 rounded-xl bg-purple-500/10 text-purple-400 border border-purple-500/20">
-          <i class="fa-solid fa-bullseye text-2xl"></i>
-        </div>
-        <div>
-          <p class="text-xs text-slate-400 uppercase font-medium">Focus Area</p>
-          <p class="text-sm font-bold text-slate-100">Core & Stamina</p>
-          <p class="text-[11px] text-purple-400">No Heavy Bulk Focus</p>
-        </div>
-      </div>
-    </div>
-
-    <!-- Layout: Interactive Workout & Timer Column + Exercises Column -->
-    <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
-
-      <!-- LEFT COLUMN: Interactive Tracker & Timer (5 Cols) -->
-      <div class="lg:col-span-5 space-y-6">
-        
-        <!-- Live Timer Box -->
-        <div class="glass-card p-6 rounded-2xl border border-emerald-500/30 neon-glow relative overflow-hidden">
-          <div class="absolute top-0 right-0 w-32 h-32 bg-emerald-500/5 rounded-full blur-2xl pointer-events-none"></div>
-          
-          <div class="flex justify-between items-center mb-4">
-            <h2 class="text-base font-bold text-white flex items-center gap-2">
-              <i class="fa-solid fa-stopwatch text-emerald-400"></i> Rest & Hold Timer
-            </h2>
-            <span id="timerStatus" class="text-xs px-2.5 py-1 rounded-full bg-slate-800 text-slate-400 border border-slate-700 font-mono">READY</span>
-          </div>
-
-          <div class="text-center py-4">
-            <div id="timerDisplay" class="text-5xl font-black font-mono tracking-tight text-white">00:45</div>
-            <p id="timerLabel" class="text-xs text-slate-400 mt-2">Default Rest / Hold Duration</p>
-          </div>
-
-          <!-- Timer Preset Buttons -->
-          <div class="grid grid-cols-4 gap-2 mb-4">
-            <button onclick="setTimer(30, '30s Rest')" class="py-1.5 text-xs font-semibold rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700">30s</button>
-            <button onclick="setTimer(45, '45s Hold/Rest')" class="py-1.5 text-xs font-semibold rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700">45s</button>
-            <button onclick="setTimer(60, '60s Rest')" class="py-1.5 text-xs font-semibold rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700">60s</button>
-            <button onclick="setTimer(10, '10s Hold')" class="py-1.5 text-xs font-semibold rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700">10s</button>
-          </div>
-
-          <!-- Timer Actions -->
-          <div class="flex gap-2">
-            <button id="startTimerBtn" onclick="startTimer()" class="flex-1 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-sm transition-all flex items-center justify-center gap-2 shadow-lg shadow-emerald-500/20">
-              <i class="fa-solid fa-play"></i> Start
-            </button>
-            <button onclick="pauseTimer()" class="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold text-sm border border-slate-700">
-              <i class="fa-solid fa-pause"></i>
-            </button>
-            <button onclick="resetTimer()" class="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold text-sm border border-slate-700">
-              <i class="fa-solid fa-rotate-right"></i>
-            </button>
-          </div>
-        </div>
-
-        <!-- Today's Workout Interactive Checklist -->
-        <div class="glass-card p-6 rounded-2xl border border-slate-800">
-          <div class="flex justify-between items-center mb-4">
+    <!-- Header -->
+    <header class="bg-slate-900 border-b border-slate-800 sticky top-0 z-50">
+        <div class="max-w-4xl mx-auto px-4 py-4 flex justify-between items-center">
             <div>
-              <h2 class="text-base font-bold text-white flex items-center gap-2">
-                <i class="fa-solid fa-square-check text-cyan-400"></i> Today's 1-Set Checklist
-              </h2>
-              <p class="text-xs text-slate-400">Complete exercises in sequence</p>
+                <h1 class="text-xl font-bold tracking-tight text-emerald-400">Calisthenics & Core</h1>
+                <p class="text-xs text-slate-400">Tue / Thu / Sat Routine</p>
             </div>
-            <button onclick="resetChecklist()" class="text-xs text-slate-400 hover:text-slate-200 underline">Reset</button>
-          </div>
-
-          <!-- Progress Bar -->
-          <div class="mb-5">
-            <div class="flex justify-between text-xs text-slate-400 mb-1">
-              <span>Workout Completion</span>
-              <span id="progressPercent" class="text-emerald-400 font-bold">0%</span>
-            </div>
-            <div class="w-full bg-slate-800 h-2 rounded-full overflow-hidden">
-              <div id="progressBar" class="bg-gradient-to-r from-emerald-500 to-cyan-500 h-full w-0 transition-all duration-300"></div>
-            </div>
-          </div>
-
-          <!-- Checklist Items (Categorized) -->
-          <div class="space-y-4 max-h-[460px] overflow-y-auto pr-1" id="checklistContainer">
-            <!-- Dynamic Content Injected via JS -->
-          </div>
+            <button @click="resetProgress()" class="text-xs bg-slate-800 hover:bg-slate-700 text-slate-300 px-3 py-1.5 rounded-lg border border-slate-700 transition">
+                Reset Day
+            </button>
         </div>
+    </header>
 
-      </div>
+    <main class="max-w-4xl mx-auto px-4 py-6 space-y-6">
 
-      <!-- RIGHT COLUMN: Weekly Grid & Exercise Cards (7 Cols) -->
-      <div class="lg:col-span-7 space-y-6">
+        <!-- Phase Selector Banner -->
+        <div class="bg-slate-900 border border-slate-800 rounded-xl p-4 flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div>
+                <span class="text-xs font-semibold uppercase tracking-wider text-emerald-400 bg-emerald-950/50 px-2.5 py-1 rounded-md border border-emerald-900/50">Phase 1</span>
+                <h2 class="text-lg font-medium mt-1">Weeks 1 & 2: Base Habit & Form</h2>
+            </div>
+            <label class="flex items-center space-x-3 cursor-pointer bg-slate-800 px-3.5 py-2 rounded-lg border border-slate-700">
+                <input type="checkbox" x-model="isWeek3Plus" @change="saveState()" class="w-4 h-4 text-emerald-500 rounded bg-slate-900 border-slate-600 focus:ring-emerald-500">
+                <span class="text-sm font-medium">Switch to Week 3+ (+2 Reps / +5s)</span>
+            </label>
+        </div>
 
         <!-- Weekly Schedule Grid -->
-        <div class="glass-card p-6 rounded-2xl border border-slate-800">
-          <h2 class="text-base font-bold text-white mb-3 flex items-center gap-2">
-            <i class="fa-solid fa-calendar-days text-emerald-400"></i> Weekly Routine Visualizer
-          </h2>
-          <div class="grid grid-cols-7 gap-2 text-center text-xs">
-            <div class="p-2.5 rounded-xl bg-slate-800/50 border border-slate-800 opacity-60">
-              <p class="text-slate-400 font-bold mb-1">MON</p>
-              <p class="text-[10px] text-slate-400">Rest / Walk</p>
-            </div>
-            <div class="p-2.5 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 font-semibold shadow-sm">
-              <p class="text-emerald-400 font-bold mb-1">TUE</p>
-              <p class="text-[10px]">Full Routine</p>
-            </div>
-            <div class="p-2.5 rounded-xl bg-slate-800/50 border border-slate-800 opacity-60">
-              <p class="text-slate-400 font-bold mb-1">WED</p>
-              <p class="text-[10px] text-slate-400">Rest / Walk</p>
-            </div>
-            <div class="p-2.5 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 font-semibold shadow-sm">
-              <p class="text-emerald-400 font-bold mb-1">THU</p>
-              <p class="text-[10px]">Full Routine</p>
-            </div>
-            <div class="p-2.5 rounded-xl bg-slate-800/50 border border-slate-800 opacity-60">
-              <p class="text-slate-400 font-bold mb-1">FRI</p>
-              <p class="text-[10px] text-slate-400">Rest / Walk</p>
-            </div>
-            <div class="p-2.5 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 font-semibold shadow-sm">
-              <p class="text-emerald-400 font-bold mb-1">SAT</p>
-              <p class="text-[10px]">Full Routine</p>
-            </div>
-            <div class="p-2.5 rounded-xl bg-slate-800/50 border border-slate-800 opacity-60">
-              <p class="text-slate-400 font-bold mb-1">SUN</p>
-              <p class="text-[10px] text-slate-400">Full Rest</p>
-            </div>
-          </div>
+        <div class="grid grid-cols-3 sm:grid-cols-7 gap-2">
+            <template x-for="day in ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']">
+                <div class="bg-slate-900 border rounded-lg p-2.5 text-center" 
+                     :class="['Tue', 'Thu', 'Sat'].includes(day) ? 'border-emerald-500/50 bg-emerald-950/10' : 'border-slate-800'">
+                    <span class="text-xs font-bold text-slate-400" x-text="day"></span>
+                    <p class="text-xs mt-1 font-medium" :class="['Tue', 'Thu', 'Sat'].includes(day) ? 'text-emerald-400' : 'text-slate-500'"
+                       x-text="['Tue', 'Thu', 'Sat'].includes(day) ? 'Workout' : 'Rest'"></p>
+                </div>
+            </template>
         </div>
 
-        <!-- Exercise Details Accordion / Cards -->
-        <div class="glass-card p-6 rounded-2xl border border-slate-800 space-y-5">
-          <div class="flex justify-between items-center border-b border-slate-800 pb-3">
-            <h2 class="text-base font-bold text-white flex items-center gap-2">
-              <i class="fa-solid fa-list-check text-cyan-400"></i> Exercise Execution Cards
-            </h2>
-            <span class="text-xs text-slate-400">Short, Actionable Tips</span>
-          </div>
+        <!-- Exercises Section -->
+        <div class="space-y-4">
+            <h3 class="text-lg font-semibold tracking-tight text-slate-200">Today's Circuit (1 Set)</h3>
+            
+            <template x-for="(ex, index) in exercises" :key="index">
+                <div class="bg-slate-900 border border-slate-800 rounded-xl p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 hover:border-slate-700 transition">
+                    <div class="space-y-1 flex-1">
+                        <div class="flex items-center space-x-2">
+                            <span class="text-xs font-mono text-slate-500" x-text="'0' + (index + 1)"></span>
+                            <h4 class="font-semibold text-white" x-text="ex.name"></h4>
+                        </div>
+                        <ul class="text-xs text-slate-400 space-y-0.5 list-disc list-inside pl-1">
+                            <template x-for="tip in ex.tips">
+                                <li x-text="tip"></li>
+                            </template>
+                        </ul>
+                    </div>
 
-          <!-- UPPER BODY SECTION -->
-          <div>
-            <h3 class="text-xs font-bold text-emerald-400 uppercase tracking-wider mb-2 flex items-center gap-1.5">
-              <i class="fa-solid fa-dumbbell"></i> Upper Body & Push
-            </h3>
-            <div class="space-y-3">
-              <!-- DB Curls -->
-              <div class="p-3.5 rounded-xl bg-slate-900/80 border border-slate-800">
-                <div class="flex justify-between items-center mb-1.5">
-                  <span class="text-sm font-bold text-white">DB Bicep Curls</span>
-                  <span class="text-xs font-mono text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20 target-rep-1">5-8 reps</span>
+                    <div class="flex items-center space-x-3 w-full sm:w-auto justify-between sm:justify-end">
+                        <span class="text-sm font-bold font-mono bg-slate-800 px-3 py-1.5 rounded-lg border border-slate-700 text-emerald-400" 
+                              x-text="isWeek3Plus ? ex.targetW3 : ex.targetW1"></span>
+                        
+                        <button @click="toggleComplete(index)" 
+                                :class="ex.completed ? 'bg-emerald-600 border-emerald-500 text-white' : 'bg-slate-800 border-slate-700 text-slate-400 hover:text-white'"
+                                class="px-4 py-2 rounded-lg border text-xs font-medium transition flex items-center space-x-1.5">
+                            <span x-text="ex.completed ? 'Completed' : 'Mark Done'"></span>
+                        </button>
+                    </div>
                 </div>
-                <ul class="text-xs text-slate-300 space-y-1 list-disc list-inside">
-                  <li>Keep elbows pinned to your sides; do not swing shoulders.</li>
-                  <li>Squeeze biceps tightly at the top for 1 second.</li>
-                  <li>Lower the dumbbell slowly (2-3 seconds down).</li>
-                </ul>
-              </div>
+            </template>
+        </div>
 
-              <!-- Knee Pushups -->
-              <div class="p-3.5 rounded-xl bg-slate-900/80 border border-slate-800">
-                <div class="flex justify-between items-center mb-1.5">
-                  <span class="text-sm font-bold text-white">Knee Pushups</span>
-                  <span class="text-xs font-mono text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20 target-rep-2">5-8 reps</span>
-                </div>
-                <ul class="text-xs text-slate-300 space-y-1 list-disc list-inside">
-                  <li>Maintain a straight line from knees to head; brace core.</li>
-                  <li>Keep elbows at a 45-degree angle relative to torso.</li>
-                  <li>Chest almost touches floor on lower position.</li>
-                </ul>
-              </div>
-
-              <!-- Pike Hold / Pushup -->
-              <div class="p-3.5 rounded-xl bg-slate-900/80 border border-slate-800">
-                <div class="flex justify-between items-center mb-1.5">
-                  <span class="text-sm font-bold text-white">Pike-to-Pushup / Pike Hold</span>
-                  <span class="text-xs font-mono text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20 target-rep-3">5 reps / 10s hold</span>
-                </div>
-                <ul class="text-xs text-slate-300 space-y-1 list-disc list-inside">
-                  <li>Hips high in upside-down V position; gaze towards feet.</li>
-                  <li>Press floor firmly away through shoulders to lock out.</li>
-                  <li>Lower head forward toward ground for pushup variation.</li>
-                </ul>
-              </div>
+        <!-- Timer / Stopwatch Tool -->
+        <div class="bg-slate-900 border border-slate-800 rounded-xl p-5 space-y-4">
+            <div class="flex justify-between items-center">
+                <h3 class="text-sm font-semibold uppercase tracking-wider text-slate-400">Hold Timer (Planks / Pikes)</h3>
+                <span class="text-2xl font-mono font-bold text-emerald-400" x-text="formatTime(timerSeconds)"></span>
             </div>
-          </div>
-
-          <!-- CORE CONTROL SECTION -->
-          <div>
-            <h3 class="text-xs font-bold text-cyan-400 uppercase tracking-wider mb-2 flex items-center gap-1.5">
-              <i class="fa-solid fa-shield-halved"></i> Core Control & Abs
-            </h3>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-              
-              <div class="p-3.5 rounded-xl bg-slate-900/80 border border-slate-800">
-                <div class="flex justify-between items-center mb-1">
-                  <span class="text-sm font-bold text-white">Hollow Body Hold</span>
-                  <span class="text-xs font-mono text-cyan-400 bg-cyan-500/10 px-2 py-0.5 rounded target-rep-hollow">15s hold</span>
-                </div>
-                <ul class="text-xs text-slate-300 space-y-1 list-disc list-inside">
-                  <li>Press lower back completely flat into floor.</li>
-                  <li>Lift shoulders and legs slightly off ground.</li>
-                </ul>
-              </div>
-
-              <div class="p-3.5 rounded-xl bg-slate-900/80 border border-slate-800">
-                <div class="flex justify-between items-center mb-1">
-                  <span class="text-sm font-bold text-white">V Situps & Suitcases</span>
-                  <span class="text-xs font-mono text-cyan-400 bg-cyan-500/10 px-2 py-0.5 rounded target-rep-4">10 reps each</span>
-                </div>
-                <ul class="text-xs text-slate-300 space-y-1 list-disc list-inside">
-                  <li>Inhale down; exhale as chest and knees meet.</li>
-                  <li>Controlled tempo—avoid using momentum.</li>
-                </ul>
-              </div>
-
-              <div class="p-3.5 rounded-xl bg-slate-900/80 border border-slate-800">
-                <div class="flex justify-between items-center mb-1">
-                  <span class="text-sm font-bold text-white">Bicycle Crunches</span>
-                  <span class="text-xs font-mono text-cyan-400 bg-cyan-500/10 px-2 py-0.5 rounded target-rep-5">10 slow reps</span>
-                </div>
-                <ul class="text-xs text-slate-300 space-y-1 list-disc list-inside">
-                  <li>Slow twist; touch shoulder (not just elbow) to knee.</li>
-                  <li>Pause 1 second on each side rotation.</li>
-                </ul>
-              </div>
-
-              <div class="p-3.5 rounded-xl bg-slate-900/80 border border-slate-800">
-                <div class="flex justify-between items-center mb-1">
-                  <span class="text-sm font-bold text-white">Russian Twists</span>
-                  <span class="text-xs font-mono text-cyan-400 bg-cyan-500/10 px-2 py-0.5 rounded target-rep-6">40 slow reps</span>
-                </div>
-                <ul class="text-xs text-slate-300 space-y-1 list-disc list-inside">
-                  <li>Keep chest high; rotate ribs fully side-to-side.</li>
-                  <li>Feet grounded if lower back feels strain.</li>
-                </ul>
-              </div>
-
-              <div class="p-3.5 rounded-xl bg-slate-900/80 border border-slate-800 md:col-span-2">
-                <div class="flex justify-between items-center mb-1">
-                  <span class="text-sm font-bold text-white">Plank Hold & Plank Pushups</span>
-                  <span class="text-xs font-mono text-cyan-400 bg-cyan-500/10 px-2 py-0.5 rounded target-rep-7">45s hold / 5 reps</span>
-                </div>
-                <ul class="text-xs text-slate-300 space-y-1 list-disc list-inside">
-                  <li>Tuck pelvis slightly under (squeeze glutes) to shield lower back.</li>
-                  <li>Push ground away through elbows; keep neck neutral.</li>
-                </ul>
-              </div>
-
+            <div class="flex flex-wrap gap-2">
+                <button @click="startTimer()" class="bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-medium px-4 py-2 rounded-lg transition">Start</button>
+                <button @click="pauseTimer()" class="bg-slate-800 hover:bg-slate-700 border border-slate-700 text-xs font-medium px-4 py-2 rounded-lg transition">Pause</button>
+                <button @click="resetTimer()" class="bg-slate-800 hover:bg-slate-700 border border-slate-700 text-xs font-medium px-4 py-2 rounded-lg transition">Reset</button>
             </div>
-          </div>
+        </div>
 
-          <!-- LOWER BODY SECTION -->
-          <div>
-            <h3 class="text-xs font-bold text-purple-400 uppercase tracking-wider mb-2 flex items-center gap-1.5">
-              <i class="fa-solid fa-person-walking"></i> Lower Body & Stamina
-            </h3>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-              <div class="p-3.5 rounded-xl bg-slate-900/80 border border-slate-800">
-                <div class=
+        <!-- Quick Habits Reference -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div class="bg-slate-900 border border-slate-800 rounded-xl p-4 space-y-2">
+                <h4 class="text-xs font-semibold uppercase tracking-wider text-emerald-400">Nutrition & Recovery</h4>
+                <ul class="text-xs text-slate-300 space-y-1 list-disc list-inside">
+                    <li>Post-workout: Ponganalu + Coconut Chutney.</li>
+                    <li>Avoid skipping breakfast on training days.</li>
+                    <li>Off days: 30-40 min brisk walk.</li>
+                </ul>
+            </div>
+            <div class="bg-slate-900 border border-slate-800 rounded-xl p-4 space-y-2">
+                <h4 class="text-xs font-semibold uppercase tracking-wider text-emerald-400">Mental & Screen Habits</h4>
+                <ul class="text-xs text-slate-300 space-y-1 list-disc list-inside">
+                    <li>Grayscale screen setting on phone.</li>
+                    <li>Keep phone out of bedroom.</li>
+                    <li>Replace scroll urges with deep breathing.</li>
+                </ul>
+            </div>
+        </div>
+
+    </main>
+
+    <script>
+        function workoutApp() {
+            return {
+                isWeek3Plus: false,
+                timerSeconds: 0,
+                timerInterval: null,
+                exercises: [
+                    { name: 'Knee or Standard Pushups', targetW1: '5 Reps', targetW3: '7 Reps', tips: ['Keep core braced rigid', 'Slow 2-second descent'], completed: false },
+                    { name: 'Pike Hold / Pike Pushup', targetW1: '10s Hold / 5 Reps', targetW3: '15s Hold / 7 Reps', tips: ['Elevate hips high', 'Active shoulder push'], completed: false },
+                    { name: 'DB / Bodyweight Squats', targetW1: '15 Reps (4Kg)', targetW3: '17 Reps (4Kg)', tips: ['Control depth', 'Keep chest upright'], completed: false },
+                    { name: 'Calf Raises', targetW1: '40 Reps', targetW3: '45 Reps', tips: ['Full stretch at bottom', 'Squeeze at top'], completed: false },
+                    { name: 'Hollow Body Hold / Deadbug', targetW1: '20s Hold', targetW3: '25s Hold', tips: ['Lower back pressed flat', 'Constant core tension'], completed: false },
+                    { name: 'Slow Bicycle Crunches', targetW1: '10 Slow Reps', targetW3: '12 Slow Reps', tips: ['Rotate from torso', 'Controlled cadence'], completed: false },
+                    { name: 'Plank Hold', targetW1: '45s Hold', targetW3: '50s Hold', tips: ['Posterior pelvic tilt', 'Glutes squeezed'], completed: false }
+                ],
+                init() {
+                    const saved = localStorage.getItem('cali_tracker');
+                    if (saved) {
+                        const data = JSON.parse(saved);
+                        this.isWeek3Plus = data.isWeek3Plus;
+                        this.exercises = data.exercises;
+                    }
+                },
+                saveState() {
+                    localStorage.setItem('cali_tracker', JSON.stringify({
+                        isWeek3Plus: this.isWeek3Plus,
+                        exercises: this.exercises
+                    }));
+                },
+                toggleComplete(index) {
+                    this.exercises[index].completed = !this.exercises[index].completed;
+                    this.saveState();
+                },
+                resetProgress() {
+                    this.exercises.forEach(ex => ex.completed = false);
+                    this.saveState();
+                },
+                startTimer() {
+                    if (this.timerInterval) return;
+                    this.timerInterval = setInterval(() => {
+                        this.timerSeconds++;
+                    }, 1000);
+                },
+                pauseTimer() {
+                    clearInterval(this.timerInterval);
+                    this.timerInterval = null;
+                },
+                resetTimer() {
+                    this.pauseTimer();
+                    this.timerSeconds = 0;
+                },
+                formatTime(sec) {
+                    const m = Math.floor(sec / 60).toString().padStart(2, '0');
+                    const s = (sec % 60).toString().padStart(2, '0');
+                    return `${m}:${s}`;
+                }
+            }
+        }
+    </script>
+</body>
+</html>
