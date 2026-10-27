@@ -2,176 +2,493 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Calisthenics & Core Control Tracker</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
-</head>
-<body class="bg-slate-950 text-slate-100 min-h-screen font-sans antialiased" x-data="workoutApp()">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Calisthenics & Core Control</title>
 
-    <!-- Header -->
-    <header class="bg-slate-900 border-b border-slate-800 sticky top-0 z-50">
-        <div class="max-w-4xl mx-auto px-4 py-4 flex justify-between items-center">
-            <div>
-                <h1 class="text-xl font-bold tracking-tight text-emerald-400">Calisthenics & Core</h1>
-                <p class="text-xs text-slate-400">Tue / Thu / Sat Routine</p>
+    <!-- PWA Meta Tags -->
+    <meta name="theme-color" content="#0f172a">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="CaliTracker">
+    <link rel="manifest" href="data:application/json;charset=utf-8,%7B%22name%22%3A%22Calisthenics%20%26%20Core%20Tracker%22%2C%22short_name%22%3A%22CaliTracker%22%2C%22start_url%22%3A%22.%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%230f172a%22%2C%22theme_color%22%3A%22%2310b981%22%7D">
+
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Inter Font -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+            user-select: none;
+        }
+        /* Custom scrollbars */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0f172a;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #334155;
+            border-radius: 3px;
+        }
+        .glow-emerald {
+            box-shadow: 0 0 25px -5px rgba(16, 185, 129, 0.25);
+        }
+        .glow-active {
+            box-shadow: 0 0 20px rgba(16, 185, 129, 0.4);
+        }
+    </style>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col pb-12">
+
+    <!-- Top Navigation Header -->
+    <header class="bg-slate-900/90 backdrop-blur-md border-b border-slate-800 sticky top-0 z-50">
+        <div class="max-w-xl mx-auto px-4 py-3 flex justify-between items-center">
+            <div class="flex items-center space-x-3">
+                <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-emerald-600 to-teal-400 flex items-center justify-center text-slate-950 font-black shadow-lg shadow-emerald-500/20">
+                    <i class="fa-solid font-bold fa-dumbbell text-slate-950 text-sm"></i>
+                </div>
+                <div>
+                    <h1 class="text-base font-bold text-white tracking-tight leading-none">Cali & Core</h1>
+                    <p class="text-[10px] font-semibold text-emerald-400 tracking-wide uppercase mt-0.5" id="syncStatus">
+                        <i class="fa-solid fa-circle-dot text-[8px] animate-pulse mr-1"></i> Connecting...
+                    </p>
+                </div>
             </div>
-            <button @click="resetProgress()" class="text-xs bg-slate-800 hover:bg-slate-700 text-slate-300 px-3 py-1.5 rounded-lg border border-slate-700 transition">
-                Reset Day
+
+            <!-- Sync Code / Modal trigger -->
+            <button id="syncBtn" onclick="openSyncModal()" class="flex items-center space-x-1.5 text-xs bg-slate-800/80 hover:bg-slate-700 text-slate-300 px-3 py-1.5 rounded-lg border border-slate-700 transition active:scale-95">
+                <i class="fa-solid fa-cloud-arrow-up text-emerald-400"></i>
+                <span id="syncBtnText">Sync Room</span>
             </button>
         </div>
     </header>
 
-    <main class="max-w-4xl mx-auto px-4 py-6 space-y-6">
+    <main class="max-w-xl mx-auto px-4 w-full flex-1 mt-4 space-y-5">
 
-        <!-- Phase Selector Banner -->
-        <div class="bg-slate-900 border border-slate-800 rounded-xl p-4 flex flex-col sm:flex-row items-center justify-between gap-4">
-            <div>
-                <span class="text-xs font-semibold uppercase tracking-wider text-emerald-400 bg-emerald-950/50 px-2.5 py-1 rounded-md border border-emerald-900/50">Phase 1</span>
-                <h2 class="text-lg font-medium mt-1">Weeks 1 & 2: Base Habit & Form</h2>
+        <!-- Routine Selector / Phase Banner -->
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 shadow-xl">
+            <div class="flex items-center justify-between gap-2 mb-3">
+                <div class="flex items-center space-x-2">
+                    <span class="text-[10px] font-bold tracking-wider text-emerald-400 bg-emerald-950/80 px-2.5 py-1 rounded-md border border-emerald-800/60 uppercase">
+                        Phase 1
+                    </span>
+                    <h2 class="text-xs font-semibold text-slate-300" id="phaseTitle">Weeks 1 & 2 Base</h2>
+                </div>
+                <button onclick="resetDayProgress()" class="text-xs text-slate-400 hover:text-red-400 bg-slate-800/50 hover:bg-slate-800 px-2.5 py-1 rounded-lg border border-slate-700/60 transition flex items-center gap-1 active:scale-95">
+                    <i class="fa-solid fa-rotate-left text-[10px]"></i> Reset
+                </button>
             </div>
-            <label class="flex items-center space-x-3 cursor-pointer bg-slate-800 px-3.5 py-2 rounded-lg border border-slate-700">
-                <input type="checkbox" x-model="isWeek3Plus" @change="saveState()" class="w-4 h-4 text-emerald-500 rounded bg-slate-900 border-slate-600 focus:ring-emerald-500">
-                <span class="text-sm font-medium">Switch to Week 3+ (+2 Reps / +5s)</span>
+
+            <!-- Phase Switch Toggle -->
+            <label class="flex items-center justify-between p-2.5 rounded-xl bg-slate-950 border border-slate-800 cursor-pointer group hover:border-slate-700 transition">
+                <div class="flex items-center space-x-2.5">
+                    <div class="w-2 h-2 rounded-full bg-emerald-400"></div>
+                    <span class="text-xs font-medium text-slate-200">Week 3+ (+2 Reps / +5s)</span>
+                </div>
+                <input type="checkbox" id="phaseToggle" onchange="togglePhase()" class="w-4 h-4 text-emerald-500 rounded bg-slate-900 border-slate-700 focus:ring-emerald-500 cursor-pointer">
             </label>
-        </div>
 
-        <!-- Weekly Schedule Grid -->
-        <div class="grid grid-cols-3 sm:grid-cols-7 gap-2">
-            <template x-for="day in ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']">
-                <div class="bg-slate-900 border rounded-lg p-2.5 text-center" 
-                     :class="['Tue', 'Thu', 'Sat'].includes(day) ? 'border-emerald-500/50 bg-emerald-950/10' : 'border-slate-800'">
-                    <span class="text-xs font-bold text-slate-400" x-text="day"></span>
-                    <p class="text-xs mt-1 font-medium" :class="['Tue', 'Thu', 'Sat'].includes(day) ? 'text-emerald-400' : 'text-slate-500'"
-                       x-text="['Tue', 'Thu', 'Sat'].includes(day) ? 'Workout' : 'Rest'"></p>
+            <!-- Days Grid -->
+            <div class="grid grid-cols-7 gap-1.5 mt-3">
+                <div class="bg-slate-950/50 border border-slate-800 rounded-lg p-1.5 text-center">
+                    <span class="text-[10px] font-bold text-slate-500 block">M</span>
+                    <span class="text-[9px] text-slate-600 font-medium">Rest</span>
                 </div>
-            </template>
+                <div class="bg-emerald-950/30 border border-emerald-800/50 rounded-lg p-1.5 text-center">
+                    <span class="text-[10px] font-bold text-emerald-400 block">T</span>
+                    <span class="text-[9px] text-emerald-500 font-semibold">Cali</span>
+                </div>
+                <div class="bg-slate-950/50 border border-slate-800 rounded-lg p-1.5 text-center">
+                    <span class="text-[10px] font-bold text-slate-500 block">W</span>
+                    <span class="text-[9px] text-slate-600 font-medium">Rest</span>
+                </div>
+                <div class="bg-emerald-950/30 border border-emerald-800/50 rounded-lg p-1.5 text-center">
+                    <span class="text-[10px] font-bold text-emerald-400 block">T</span>
+                    <span class="text-[9px] text-emerald-500 font-semibold">Cali</span>
+                </div>
+                <div class="bg-slate-950/50 border border-slate-800 rounded-lg p-1.5 text-center">
+                    <span class="text-[10px] font-bold text-slate-500 block">F</span>
+                    <span class="text-[9px] text-slate-600 font-medium">Rest</span>
+                </div>
+                <div class="bg-emerald-950/30 border border-emerald-800/50 rounded-lg p-1.5 text-center">
+                    <span class="text-[10px] font-bold text-emerald-400 block">S</span>
+                    <span class="text-[9px] text-emerald-500 font-semibold">Cali</span>
+                </div>
+                <div class="bg-slate-950/50 border border-slate-800 rounded-lg p-1.5 text-center">
+                    <span class="text-[10px] font-bold text-slate-500 block">S</span>
+                    <span class="text-[9px] text-slate-600 font-medium">Rest</span>
+                </div>
+            </div>
         </div>
 
-        <!-- Exercises Section -->
-        <div class="space-y-4">
-            <h3 class="text-lg font-semibold tracking-tight text-slate-200">Today's Circuit (1 Set)</h3>
+        <!-- HOLD TIMER / STOPWATCH (Placed prominently near top) -->
+        <div class="bg-slate-900 border border-emerald-500/30 rounded-2xl p-5 shadow-xl glow-emerald relative overflow-hidden">
+            <div class="absolute top-0 right-0 w-32 h-32 bg-emerald-500/5 rounded-full blur-2xl pointer-events-none"></div>
             
-            <template x-for="(ex, index) in exercises" :key="index">
-                <div class="bg-slate-900 border border-slate-800 rounded-xl p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 hover:border-slate-700 transition">
-                    <div class="space-y-1 flex-1">
-                        <div class="flex items-center space-x-2">
-                            <span class="text-xs font-mono text-slate-500" x-text="'0' + (index + 1)"></span>
-                            <h4 class="font-semibold text-white" x-text="ex.name"></h4>
-                        </div>
-                        <ul class="text-xs text-slate-400 space-y-0.5 list-disc list-inside pl-1">
-                            <template x-for="tip in ex.tips">
-                                <li x-text="tip"></li>
-                            </template>
-                        </ul>
-                    </div>
-
-                    <div class="flex items-center space-x-3 w-full sm:w-auto justify-between sm:justify-end">
-                        <span class="text-sm font-bold font-mono bg-slate-800 px-3 py-1.5 rounded-lg border border-slate-700 text-emerald-400" 
-                              x-text="isWeek3Plus ? ex.targetW3 : ex.targetW1"></span>
-                        
-                        <button @click="toggleComplete(index)" 
-                                :class="ex.completed ? 'bg-emerald-600 border-emerald-500 text-white' : 'bg-slate-800 border-slate-700 text-slate-400 hover:text-white'"
-                                class="px-4 py-2 rounded-lg border text-xs font-medium transition flex items-center space-x-1.5">
-                            <span x-text="ex.completed ? 'Completed' : 'Mark Done'"></span>
-                        </button>
-                    </div>
+            <div class="flex items-center justify-between mb-2">
+                <div class="flex items-center space-x-2">
+                    <i class="fa-solid fa-stopwatch text-emerald-400 text-sm"></i>
+                    <h3 class="text-xs font-bold uppercase tracking-wider text-slate-300">Hold & Rest Timer</h3>
                 </div>
-            </template>
+                <span id="timerStateLabel" class="text-[10px] font-mono px-2 py-0.5 rounded bg-slate-800 text-slate-400">Ready</span>
+            </div>
+
+            <!-- Big Display -->
+            <div class="text-center py-2">
+                <div id="timerDisplay" class="text-5xl font-black font-mono tracking-wider text-emerald-400">00:00</div>
+            </div>
+
+            <!-- Preset Buttons -->
+            <div class="grid grid-cols-6 gap-1.5 my-3">
+                <button onclick="setTimerPreset(10)" class="bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold py-1.5 rounded-lg border border-slate-700 transition active:scale-95">10s</button>
+                <button onclick="setTimerPreset(15)" class="bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold py-1.5 rounded-lg border border-slate-700 transition active:scale-95">15s</button>
+                <button onclick="setTimerPreset(20)" class="bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold py-1.5 rounded-lg border border-slate-700 transition active:scale-95">20s</button>
+                <button onclick="setTimerPreset(30)" class="bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold py-1.5 rounded-lg border border-slate-700 transition active:scale-95">30s</button>
+                <button onclick="setTimerPreset(45)" class="bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold py-1.5 rounded-lg border border-slate-700 transition active:scale-95">45s</button>
+                <button onclick="setTimerPreset(60)" class="bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold py-1.5 rounded-lg border border-slate-700 transition active:scale-95">60s</button>
+            </div>
+
+            <!-- Timer Controls -->
+            <div class="flex gap-2">
+                <button id="startTimerBtn" onclick="toggleTimer()" class="flex-1 bg-emerald-500 hover:bg-emerald-400 active:bg-emerald-600 text-slate-950 font-bold py-2.5 rounded-xl shadow-lg shadow-emerald-500/20 text-sm transition flex items-center justify-center space-x-2">
+                    <i class="fa-solid fa-play text-xs"></i>
+                    <span>Start Timer</span>
+                </button>
+                <button onclick="resetTimer()" class="bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold px-4 py-2.5 rounded-xl border border-slate-700 text-sm transition active:scale-95">
+                    <i class="fa-solid fa-rotate-right"></i>
+                </button>
+            </div>
         </div>
 
-        <!-- Timer / Stopwatch Tool -->
-        <div class="bg-slate-900 border border-slate-800 rounded-xl p-5 space-y-4">
-            <div class="flex justify-between items-center">
-                <h3 class="text-sm font-semibold uppercase tracking-wider text-slate-400">Hold Timer (Planks / Pikes)</h3>
-                <span class="text-2xl font-mono font-bold text-emerald-400" x-text="formatTime(timerSeconds)"></span>
+        <!-- Daily Progress Bar -->
+        <div class="bg-slate-900 border border-slate-800 rounded-xl p-3 space-y-1.5">
+            <div class="flex justify-between items-center text-xs">
+                <span class="font-semibold text-slate-300">Today's Circuit Progress</span>
+                <span class="font-bold font-mono text-emerald-400" id="progressText">0 / 7 Completed</span>
             </div>
-            <div class="flex flex-wrap gap-2">
-                <button @click="startTimer()" class="bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-medium px-4 py-2 rounded-lg transition">Start</button>
-                <button @click="pauseTimer()" class="bg-slate-800 hover:bg-slate-700 border border-slate-700 text-xs font-medium px-4 py-2 rounded-lg transition">Pause</button>
-                <button @click="resetTimer()" class="bg-slate-800 hover:bg-slate-700 border border-slate-700 text-xs font-medium px-4 py-2 rounded-lg transition">Reset</button>
+            <div class="w-full bg-slate-950 rounded-full h-2.5 overflow-hidden border border-slate-800/80">
+                <div id="progressBar" class="bg-gradient-to-r from-emerald-500 to-teal-400 h-2.5 rounded-full transition-all duration-300" style="width: 0%"></div>
             </div>
         </div>
 
-        <!-- Quick Habits Reference -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div class="bg-slate-900 border border-slate-800 rounded-xl p-4 space-y-2">
-                <h4 class="text-xs font-semibold uppercase tracking-wider text-emerald-400">Nutrition & Recovery</h4>
-                <ul class="text-xs text-slate-300 space-y-1 list-disc list-inside">
-                    <li>Post-workout: Ponganalu + Coconut Chutney.</li>
-                    <li>Avoid skipping breakfast on training days.</li>
-                    <li>Off days: 30-40 min brisk walk.</li>
-                </ul>
-            </div>
-            <div class="bg-slate-900 border border-slate-800 rounded-xl p-4 space-y-2">
-                <h4 class="text-xs font-semibold uppercase tracking-wider text-emerald-400">Mental & Screen Habits</h4>
-                <ul class="text-xs text-slate-300 space-y-1 list-disc list-inside">
-                    <li>Grayscale screen setting on phone.</li>
-                    <li>Keep phone out of bedroom.</li>
-                    <li>Replace scroll urges with deep breathing.</li>
-                </ul>
-            </div>
+        <!-- Exercise List Checklist -->
+        <div class="space-y-3" id="exerciseList">
+            <!-- Dynamically populated via JS -->
         </div>
 
     </main>
 
-    <script>
-        function workoutApp() {
-            return {
-                isWeek3Plus: false,
-                timerSeconds: 0,
-                timerInterval: null,
-                exercises: [
-                    { name: 'Knee or Standard Pushups', targetW1: '5 Reps', targetW3: '7 Reps', tips: ['Keep core braced rigid', 'Slow 2-second descent'], completed: false },
-                    { name: 'Pike Hold / Pike Pushup', targetW1: '10s Hold / 5 Reps', targetW3: '15s Hold / 7 Reps', tips: ['Elevate hips high', 'Active shoulder push'], completed: false },
-                    { name: 'DB / Bodyweight Squats', targetW1: '15 Reps (4Kg)', targetW3: '17 Reps (4Kg)', tips: ['Control depth', 'Keep chest upright'], completed: false },
-                    { name: 'Calf Raises', targetW1: '40 Reps', targetW3: '45 Reps', tips: ['Full stretch at bottom', 'Squeeze at top'], completed: false },
-                    { name: 'Hollow Body Hold / Deadbug', targetW1: '20s Hold', targetW3: '25s Hold', tips: ['Lower back pressed flat', 'Constant core tension'], completed: false },
-                    { name: 'Slow Bicycle Crunches', targetW1: '10 Slow Reps', targetW3: '12 Slow Reps', tips: ['Rotate from torso', 'Controlled cadence'], completed: false },
-                    { name: 'Plank Hold', targetW1: '45s Hold', targetW3: '50s Hold', tips: ['Posterior pelvic tilt', 'Glutes squeezed'], completed: false }
-                ],
-                init() {
-                    const saved = localStorage.getItem('cali_tracker');
-                    if (saved) {
-                        const data = JSON.parse(saved);
-                        this.isWeek3Plus = data.isWeek3Plus;
-                        this.exercises = data.exercises;
-                    }
-                },
-                saveState() {
-                    localStorage.setItem('cali_tracker', JSON.stringify({
-                        isWeek3Plus: this.isWeek3Plus,
-                        exercises: this.exercises
-                    }));
-                },
-                toggleComplete(index) {
-                    this.exercises[index].completed = !this.exercises[index].completed;
-                    this.saveState();
-                },
-                resetProgress() {
-                    this.exercises.forEach(ex => ex.completed = false);
-                    this.saveState();
-                },
-                startTimer() {
-                    if (this.timerInterval) return;
-                    this.timerInterval = setInterval(() => {
-                        this.timerSeconds++;
-                    }, 1000);
-                },
-                pauseTimer() {
-                    clearInterval(this.timerInterval);
-                    this.timerInterval = null;
-                },
-                resetTimer() {
-                    this.pauseTimer();
-                    this.timerSeconds = 0;
-                },
-                formatTime(sec) {
-                    const m = Math.floor(sec / 60).toString().padStart(2, '0');
-                    const s = (sec % 60).toString().padStart(2, '0');
-                    return `${m}:${s}`;
+    <!-- Cloud Sync Modal -->
+    <div id="syncModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl max-w-sm w-full p-5 space-y-4 shadow-2xl">
+            <div class="flex justify-between items-center">
+                <h3 class="text-base font-bold text-white flex items-center gap-2">
+                    <i class="fa-solid fa-cloud text-emerald-400"></i> Sync Devices
+                </h3>
+                <button onclick="closeSyncModal()" class="text-slate-400 hover:text-white text-lg">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+            <p class="text-xs text-slate-400 leading-relaxed">
+                Use the same <strong class="text-slate-200">Sync Room Code</strong> on your Phone and Laptop to keep your workout progress synchronized in real-time!
+            </p>
+            
+            <div class="space-y-2">
+                <label class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">Your Sync Room Code</label>
+                <div class="flex gap-2">
+                    <input type="text" id="roomCodeInput" class="bg-slate-950 border border-slate-800 text-emerald-400 font-mono font-bold text-center text-sm rounded-xl px-3 py-2.5 flex-1 focus:outline-none focus:border-emerald-500 uppercase tracking-widest" placeholder="ROOM CODE">
+                    <button onclick="joinRoom()" class="bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold px-4 py-2.5 rounded-xl text-xs transition">
+                        Connect
+                    </button>
+                </div>
+            </div>
+
+            <div class="text-[11px] text-slate-500 text-center border-t border-slate-800/80 pt-3">
+                Current Active Code: <span id="currentRoomDisplay" class="font-mono text-emerald-400 font-bold">---</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Firebase SDKs -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // Firebase Configuration Setup
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'calisthenics-tracker-app';
+        const firebaseConfig = typeof __firebase_config !== 'undefined' 
+            ? JSON.parse(__firebase_config) 
+            : {
+                apiKey: "AIzaSyDemoConfigForWebAndMobileSync",
+                authDomain: "calisthenics-tracker.firebaseapp.com",
+                projectId: "calisthenics-tracker",
+                storageBucket: "calisthenics-tracker.appspot.com",
+                messagingSenderId: "1234567890",
+                appId: "1:1234567890:web:abcdef123456"
+            };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        // App Data State
+        const defaultExercises = [
+            { id: 'pushups', name: 'Knee or Standard Pushups', w1: '5 Reps', w3: '7 Reps', tips: ['Brace core rigid', 'Slow 2-second descent'], completed: false },
+            { id: 'pike', name: 'Pike Hold / Pike Pushup', w1: '10s Hold / 5 Reps', w3: '15s Hold / 7 Reps', tips: ['Elevate hips high', 'Active shoulder push'], completed: false },
+            { id: 'squats', name: 'DB or Bodyweight Squats', w1: '15 Reps (4Kg)', w3: '17 Reps (4Kg)', tips: ['Control depth', 'Keep chest upright'], completed: false },
+            { id: 'calfraises', name: 'Calf Raises', w1: '40 Reps', w3: '45 Reps', tips: ['Full stretch at bottom', 'Squeeze at top'], completed: false },
+            { id: 'hollow', name: 'Hollow Body Hold / Deadbug', w1: '20s Hold', w3: '25s Hold', tips: ['Lower back flat on floor', 'Constant tension'], completed: false },
+            { id: 'bicycles', name: 'Slow Bicycle Crunches', w1: '10 Slow Reps', w3: '12 Slow Reps', tips: ['Rotate from core', 'Controlled cadence'], completed: false },
+            { id: 'plank', name: 'Plank Hold', w1: '45s Hold', w3: '50s Hold', tips: ['Posterior pelvic tilt', 'Glutes squeezed tight'], completed: false }
+        ];
+
+        window.state = {
+            isWeek3Plus: false,
+            exercises: JSON.parse(JSON.stringify(defaultExercises)),
+            roomCode: localStorage.getItem('cali_room_code') || ('ROOM-' + Math.floor(1000 + Math.random() * 9000))
+        };
+
+        let unsubscribeFirestore = null;
+        let currentUser = null;
+
+        // Initialize Authentication & Firestore
+        async function initAuth() {
+            try {
+                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                    await signInWithCustomToken(auth, __initial_auth_token);
+                } else {
+                    await signInAnonymously(auth);
                 }
+            } catch (err) {
+                console.warn("Auth initialization fallback:", err);
             }
+        }
+
+        onAuthStateChanged(auth, (user) => {
+            currentUser = user;
+            if (user) {
+                document.getElementById('syncStatus').innerHTML = `<i class="fa-solid fa-cloud-check text-emerald-400"></i> Cloud Synced`;
+                setupFirestoreSync();
+            } else {
+                document.getElementById('syncStatus').innerHTML = `<i class="fa-solid fa-cloud-slash text-amber-400"></i> Local Mode`;
+            }
+        });
+
+        // Setup Firestore Listener
+        function setupFirestoreSync() {
+            if (!currentUser) return;
+            if (unsubscribeFirestore) unsubscribeFirestore();
+
+            const roomDocRef = doc(db, 'artifacts', appId, 'public', 'data', 'rooms', window.state.roomCode);
+
+            unsubscribeFirestore = onSnapshot(roomDocRef, (snapshot) => {
+                if (snapshot.exists()) {
+                    const data = snapshot.data();
+                    if (data && data.exercises) {
+                        window.state.exercises = data.exercises;
+                        window.state.isWeek3Plus = !!data.isWeek3Plus;
+                        document.getElementById('phaseToggle').checked = window.state.isWeek3Plus;
+                        renderUI();
+                    }
+                } else {
+                    saveToCloud(); // Initialize room on cloud
+                }
+            }, (error) => {
+                console.error("Firestore sync error:", error);
+            });
+
+            document.getElementById('currentRoomDisplay').innerText = window.state.roomCode;
+            document.getElementById('roomCodeInput').value = window.state.roomCode;
+            localStorage.setItem('cali_room_code', window.state.roomCode);
+        }
+
+        // Save State to Cloud
+        window.saveToCloud = async function() {
+            renderUI();
+            localStorage.setItem('cali_local_data', JSON.stringify(window.state));
+
+            if (!currentUser) return;
+            try {
+                const roomDocRef = doc(db, 'artifacts', appId, 'public', 'data', 'rooms', window.state.roomCode);
+                await setDoc(roomDocRef, {
+                    exercises: window.state.exercises,
+                    isWeek3Plus: window.state.isWeek3Plus,
+                    updatedAt: Date.now()
+                });
+            } catch (e) {
+                console.error("Error pushing state to Firestore:", e);
+            }
+        };
+
+        // Window scope global handler functions
+        window.joinRoom = function() {
+            const input = document.getElementById('roomCodeInput').value.trim().toUpperCase();
+            if (input) {
+                window.state.roomCode = input;
+                setupFirestoreSync();
+                window.closeSyncModal();
+            }
+        };
+
+        window.toggleExercise = function(index) {
+            window.state.exercises[index].completed = !window.state.exercises[index].completed;
+            window.saveToCloud();
+        };
+
+        window.togglePhase = function() {
+            window.state.isWeek3Plus = document.getElementById('phaseToggle').checked;
+            window.saveToCloud();
+        };
+
+        window.resetDayProgress = function() {
+            window.state.exercises.forEach(ex => ex.completed = false);
+            window.saveToCloud();
+        };
+
+        // UI Rendering Logic
+        function renderUI() {
+            // Update Phase Title
+            document.getElementById('phaseTitle').innerText = window.state.isWeek3Plus ? "Week 3+ Progression" : "Weeks 1 & 2 Base";
+
+            // Render Exercises
+            const listEl = document.getElementById('exerciseList');
+            let completedCount = 0;
+
+            listEl.innerHTML = window.state.exercises.map((ex, idx) => {
+                if (ex.completed) completedCount++;
+                const targetText = window.state.isWeek3Plus ? ex.w3 : ex.w1;
+
+                return `
+                    <div onclick="toggleExercise(${idx})" class="bg-slate-900 border ${ex.completed ? 'border-emerald-500/60 bg-emerald-950/20' : 'border-slate-800/90 hover:border-slate-700'} rounded-2xl p-4 transition duration-200 cursor-pointer flex items-center justify-between gap-3 shadow-lg active:scale-[0.99]">
+                        <div class="space-y-1 flex-1">
+                            <div class="flex items-center space-x-2">
+                                <span class="text-xs font-mono text-slate-500">0${idx + 1}</span>
+                                <h4 class="font-bold text-sm text-slate-100 ${ex.completed ? 'line-through text-slate-400' : ''}">${ex.name}</h4>
+                            </div>
+                            <div class="flex items-center space-x-2">
+                                <span class="text-xs font-bold text-emerald-400 bg-emerald-950/80 px-2 py-0.5 rounded border border-emerald-900/60">${targetText}</span>
+                            </div>
+                            <p class="text-[11px] text-slate-400 pl-1">${ex.tips.join(' • ')}</p>
+                        </div>
+                        <div class="flex items-center">
+                            <div class="w-8 h-8 rounded-xl border flex items-center justify-center transition-all ${ex.completed ? 'bg-emerald-500 border-emerald-400 text-slate-950' : 'border-slate-700 bg-slate-950 text-slate-600'}">
+                                <i class="fa-solid fa-check text-xs font-black"></i>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            // Progress Bar
+            document.getElementById('progressText').innerText = `${completedCount} / 7 Completed`;
+            const percent = Math.round((completedCount / 7) * 100);
+            document.getElementById('progressBar').style.width = `${percent}%`;
+        }
+
+        // Initialize on load
+        window.addEventListener('DOMContentLoaded', () => {
+            // Load local cache if available
+            const cache = localStorage.getItem('cali_local_data');
+            if (cache) {
+                try {
+                    const parsed = JSON.parse(cache);
+                    window.state.exercises = parsed.exercises || defaultExercises;
+                    window.state.isWeek3Plus = !!parsed.isWeek3Plus;
+                    document.getElementById('phaseToggle').checked = window.state.isWeek3Plus;
+                } catch(e){}
+            }
+            renderUI();
+            initAuth();
+        });
+    </script>
+
+    <!-- Stopwatch Logic Scripts -->
+    <script>
+        let timerSeconds = 0;
+        let timerInterval = null;
+        let isRunning = false;
+
+        function updateTimerDisplay() {
+            const mins = Math.floor(timerSeconds / 60).toString().padStart(2, '0');
+            const secs = (timerSeconds % 60).toString().padStart(2, '0');
+            document.getElementById('timerDisplay').innerText = `${mins}:${secs}`;
+        }
+
+        function setTimerPreset(seconds) {
+            resetTimer();
+            timerSeconds = seconds;
+            updateTimerDisplay();
+        }
+
+        function toggleTimer() {
+            const btn = document.getElementById('startTimerBtn');
+            const label = document.getElementById('timerStateLabel');
+
+            if (isRunning) {
+                clearInterval(timerInterval);
+                timerInterval = null;
+                isRunning = false;
+                btn.innerHTML = `<i class="fa-solid fa-play text-xs"></i><span>Resume Timer</span>`;
+                btn.className = "flex-1 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold py-2.5 rounded-xl shadow-lg shadow-emerald-500/20 text-sm transition";
+                label.innerText = "Paused";
+                label.className = "text-[10px] font-mono px-2 py-0.5 rounded bg-amber-950 text-amber-400 border border-amber-800";
+            } else {
+                if (timerSeconds === 0) timerSeconds = 30; // Default if 0
+                isRunning = true;
+                btn.innerHTML = `<i class="fa-solid fa-pause text-xs"></i><span>Pause Timer</span>`;
+                btn.className = "flex-1 bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold py-2.5 rounded-xl shadow-lg shadow-amber-500/20 text-sm transition";
+                label.innerText = "Running";
+                label.className = "text-[10px] font-mono px-2 py-0.5 rounded bg-emerald-950 text-emerald-400 border border-emerald-800 animate-pulse";
+
+                timerInterval = setInterval(() => {
+                    if (timerSeconds > 0) {
+                        timerSeconds--;
+                        updateTimerDisplay();
+                    } else {
+                        clearInterval(timerInterval);
+                        isRunning = false;
+                        btn.innerHTML = `<i class="fa-solid fa-play text-xs"></i><span>Start Timer</span>`;
+                        btn.className = "flex-1 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold py-2.5 rounded-xl shadow-lg shadow-emerald-500/20 text-sm transition";
+                        label.innerText = "Done!";
+                        label.className = "text-[10px] font-mono px-2 py-0.5 rounded bg-emerald-500 text-slate-950 font-bold";
+                        
+                        // Vibration alert on mobile device when finished
+                        if (navigator.vibrate) navigator.vibrate([200, 100, 200]);
+                    }
+                }, 1000);
+            }
+        }
+
+        function resetTimer() {
+            if (timerInterval) clearInterval(timerInterval);
+            timerInterval = null;
+            isRunning = false;
+            timerSeconds = 0;
+            updateTimerDisplay();
+            const btn = document.getElementById('startTimerBtn');
+            const label = document.getElementById('timerStateLabel');
+            btn.innerHTML = `<i class="fa-solid fa-play text-xs"></i><span>Start Timer</span>`;
+            btn.className = "flex-1 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold py-2.5 rounded-xl shadow-lg shadow-emerald-500/20 text-sm transition";
+            label.innerText = "Ready";
+            label.className = "text-[10px] font-mono px-2 py-0.5 rounded bg-slate-800 text-slate-400";
+        }
+
+        function openSyncModal() {
+            document.getElementById('syncModal').classList.remove('hidden');
+        }
+
+        function closeSyncModal() {
+            document.getElementById('syncModal').classList.add('hidden');
         }
     </script>
 </body>
